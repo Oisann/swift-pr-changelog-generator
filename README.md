@@ -18,7 +18,9 @@ It gets every commit between BRANCH_MASTER and BRANCH and generates a list of ch
 ## Add command
 Add this to .bashrc
 >function generateChangelog() {
+
 >        (docker run --rm -it -v "${PWD}":/app/repo -e BRANCH="origin/development" -e BRANCH_MASTER="origin/master" oisann/swift-pr-changelog-generator:latest)
+
 >}
 
 ## TODO
