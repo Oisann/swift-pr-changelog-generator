@@ -19,6 +19,27 @@ extension String {
     }
 }
 
+func getEnvironmentVar(_ name: String) -> String? {
+    guard let rawValue = getenv(name) else { return nil }
+    return String(utf8String: rawValue)
+}
+
+guard let REPO = getEnvironmentVar("REPO") else {
+    print("No REPO path found in the environment.")
+    exit(0)
+}
+
+guard let BRANCH = getEnvironmentVar("BRANCH") else {
+    print("No BRANCH found in the environment.")
+    exit(0)
+}
+
+guard let BRANCH_MASTER = getEnvironmentVar("BRANCH_MASTER") else {
+    print("No BRANCH found in the environment.")
+    exit(0)
+}
+
+
 func matches(for regex: String, in text: String, options: NSRegularExpression.Options = NSRegularExpression.Options.useUnixLineSeparators) -> [String] {
     do {
         let regex = try NSRegularExpression(pattern: regex, options: options)
@@ -50,7 +71,7 @@ func shell(launchPath: String, arguments: [String]) -> String {
     return output_from_command
 }
 
-let output = shell(launchPath: "/usr/bin/git", arguments: [ "-C", "/Users/trainee/Documents/Github/HuconGlobal/Xcode Development/iapclient-bristow", "log", "origin/master..origin/development" ])
+let output = shell(launchPath: "/usr/bin/git", arguments: [ "-C", REPO, "log", "\(BRANCH_MASTER)..\(BRANCH)" ])
 let matched = matches(for: ".*", in: output)
 
 var changes: [Change] = []
@@ -105,8 +126,6 @@ for (_, change) in changes.enumerated() {
     if title.count > 0 {
         titleText = title[0]
     }
-
-    print("\(change.author) \(change.date): \(change.title)\n\(change.message)")
     
     let changeText = change.message.count > 0 ? change.message : (titleText.count > 0 ? change.title.replace(titleText, "") : "")
     if !changeText.hasPrefix("--") && changeText.count > 0 {
@@ -114,7 +133,7 @@ for (_, change) in changes.enumerated() {
     }
 }
 
-let file = "CHANGELOG"
+let file = "/repo/CHANGELOG"
 
 let dir =  URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
 let fileURL = dir.appendingPathComponent(file)
